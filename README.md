@@ -1,11 +1,36 @@
-# qzone-export
+# qzone-shuoshuo-timeline
 
-> 把 QQ 空间的**说说**和**日志**，连同**图片、评论、转发、定位**，导出成本地 Markdown。
+> 把 QQ 空间的**说说**导出来，做成一张可以**按时间轴整体回看**的离线网页。
+> 同时生成一份本地 Markdown 存档（说说 + 日志），连同**图片、评论、转发、定位**。
 > QQ 空间没有官方导出入口，这是目前比较完整的一条民间路线。
 
-**English:** Export your Qzone (QQ空间) posts — shuoshuo (说说) and blog posts (日志) — into a self-contained local Markdown archive, with pictures, comments, reposts and location data preserved. Ships as an Agent Skill plus a set of scripts, and follows a written standard operating procedure.
+**English:** Export your Qzone (QQ空间) shuoshuo (说说) and turn them into an offline, single-file timeline page you can scroll through to revisit your past — with a year/month heatmap, search and filters, and a photo viewer. Also writes a self-contained Markdown archive (shuoshuo and blog posts) with pictures, comments, reposts and location preserved. Ships as an Agent Skill (named `qzone-export`) plus a set of scripts, and follows a written standard operating procedure.
 
 一次真实导出：**1573 条说说 + 16 篇日志 + 722 张图片**，输出 20840 行、1.04 MB 的 Markdown，时间跨度 2009–2025。
+
+---
+
+## 时间轴页面
+
+导出之后跑一条命令，得到一个 `QQ空间时间轴.html`。双击就能打开，不用装任何东西，也不用联网。
+
+![时间轴页面：概览、热力图和时间轴](examples/screenshots/timeline-desktop.png)
+
+<p>
+  <img src="examples/screenshots/timeline-dark.png" width="64%" alt="深色模式">
+  <img src="examples/screenshots/timeline-mobile.png" width="22%" alt="手机端">
+</p>
+
+- **年月热力图**：一眼看出哪些年、哪些月发得最多，颜色越深越多。点有数字的格子，直接跳到那个月。
+- **时间轴**：按年、月分组，默认最新在前，可以切成最早在前。右侧有年份导航。
+- **搜索与筛选**：全文搜索（含评论、地点，命中处高亮）、按年份、只看有图、只看有评论。
+- **回顾**：「跳到最早一条」「随机回顾一条」，还有「那年今日」——往年同一天发过什么。
+- **看图**：点缩略图看大图，键盘 ← / → 切换，Esc 关闭。已经失效的图片会明确标出来。
+- **深色模式**，也适配手机屏幕。
+- **完全离线**：单个 HTML 文件，没有任何联网请求，也不依赖外部库。数据都嵌在文件里；图片按相对路径引用，所以 `.html` 要和 `images/` 放在一起。
+
+> 时间轴只包含**说说**。日志在 Markdown 存档里。
+> 上面的截图来自用虚构数据生成的示例页 `examples/example-timeline.html`。克隆仓库后可以直接打开看。
 
 ---
 
@@ -24,7 +49,7 @@ QQ 空间是很多人的青春硬盘，但它：
 
 ## 成品长什么样
 
-`examples/example-output.md` 是**工具的真实输出**（用虚构数据生成，不包含任何真实信息）。每段长这样：
+Markdown 存档方面，`examples/example-output.md` 是**工具的真实输出**（用虚构数据生成，不包含任何真实信息）。每段长这样：
 
 ```markdown
 ## 2025-12-26 22:25 · 说说
@@ -54,7 +79,7 @@ QQ 空间给每个 CGI 请求加了一个叫 `g_tk` 的签名，它由浏览器 
 
 Cookie 由浏览器自动携带，不用手工拼 Cookie 头，也绕开了 httpOnly 和 GBK 编码的坑。
 
-数据抓下来之后都是纯本地处理：图片并发下载、**按 Magic bytes 判类型**（不信 URL 后缀）、失效图重试，最后用 Python 标准库合成 Markdown。
+数据抓下来之后都是纯本地处理：图片并发下载、**按 Magic bytes 判类型**（不信 URL 后缀）、失效图重试，最后用 Python 标准库合成 Markdown 和时间轴页面。
 
 **全程不碰 QQ 的阅读权限之外的东西，也不会向任何第三方发送数据。**
 
@@ -64,7 +89,7 @@ Cookie 由浏览器自动携带，不用手工拼 Cookie 头，也绕开了 http
 
 本仓库遵循开放的 [Agent Skills](https://agentskills.io/specification) 规范（`SKILL.md` + `scripts/` + `references/`）。Claude Code、Codex、Gemini CLI、Cursor、GitHub Copilot、OpenCode 等支持 SKILL.md 的工具都能用。
 
-把仓库克隆到对应的 skills 目录，**文件夹名必须是 `qzone-export`**（规范要求与 `name` 字段一致）：
+把仓库克隆到对应的 skills 目录，**文件夹名必须是 `qzone-export`**（规范要求与 `name` 字段一致）。仓库名叫 `qzone-shuoshuo-timeline`，所以克隆时要像下面这样指定目标文件夹：
 
 | 工具 | 用户级目录（所有项目可用） | 项目级目录 |
 |---|---|---|
@@ -87,6 +112,7 @@ git clone https://github.com/RanchoGao/qzone-shuoshuo-timeline.git ~/.claude/ski
 装好后直接对 agent 说：
 
 - 「帮我把 QQ 空间的说说导出来」
+- 「做一个 QQ 空间说说的时间轴，我想回看这些年」
 - 「备份一下 QQ 空间的日志」
 - 「导出 QQ 空间，图片存到 D:/备份」
 
@@ -118,6 +144,7 @@ cd /tmp/qe && npm install puppeteer-core
 #    Node 侧不需要 puppeteer-core，纯逻辑自测；没装 Node 可跳过
 node tests/test_lib.js
 python tests/test_core.py
+python tests/test_timeline.py
 
 # 1. 启动带调试端口的浏览器（会弹出窗口，在里面扫码登录 QQ 空间）
 #    Windows
@@ -141,10 +168,13 @@ NODE_PATH=/tmp/qe/node_modules node scripts/fetch_blog.js
 python scripts/download_images.py
 python scripts/retry_failed.py
 
-# 5. 生成 Markdown
+# 5. 生成 Markdown 存档
 python scripts/gen_markdown.py
 
-# 6. 收尾
+# 6. 生成时间轴页面（只含说说）
+python scripts/gen_timeline.py
+
+# 7. 收尾
 NODE_PATH=/tmp/qe/node_modules node scripts/close.js
 rm -rf .chrome-profile          # 务必删掉，里面是你的登录态
 ```
@@ -152,9 +182,10 @@ rm -rf .chrome-profile          # 务必删掉，里面是你的登录态
 产物都在仓库根目录：
 
 ```
-QQ空间存档.md         ← 最终成果
+QQ空间时间轴.html     ← 时间轴页面，双击打开（要和 images/ 放一起）
+QQ空间存档.md         ← Markdown 存档（说说 + 日志）
 images/              ← 所有图片
-data/*.json          ← 原始数据（字段比 Markdown 全）
+data/*.json          ← 原始数据（字段比 Markdown 和时间轴都全）
 ```
 
 ### 换输出目录
@@ -172,12 +203,21 @@ export QZONE_OUT="D:/备份/qzone"
 QZONE_TITLE="我的QQ空间" python scripts/gen_markdown.py   # 输出 我的QQ空间.md
 ```
 
+时间轴页面同理，用 `QZONE_TIMELINE_TITLE`（页面标题，同时是文件名）。想让文件名和标题不一样，再加 `QZONE_TIMELINE_FILE`：
+
+```bash
+QZONE_TIMELINE_TITLE="我的这些年" python scripts/gen_timeline.py   # 输出 我的这些年.html
+QZONE_TIMELINE_TITLE="我的这些年" QZONE_TIMELINE_FILE=timeline python scripts/gen_timeline.py   # 标题不变，文件叫 timeline.html
+```
+
 ### 全部可调参数
 
 | 环境变量 | 默认 | 说明 |
 |---|---|---|
-| `QZONE_OUT` | 仓库根目录 | 输出根目录，`QQ空间存档.md`、`data/`、`images/` 都生成在它下面。Node 与 Python 两侧语义一致，**不是** `data/` 本身 |
+| `QZONE_OUT` | 仓库根目录 | 输出根目录，`QQ空间存档.md`、`QQ空间时间轴.html`、`data/`、`images/` 都生成在它下面。Node 与 Python 两侧语义一致，**不是** `data/` 本身 |
 | `QZONE_TITLE` | `QQ空间存档` | Markdown 文件名（不含 `.md`） |
+| `QZONE_TIMELINE_TITLE` | `QQ空间时间轴` | 时间轴页面标题，默认也是文件名（不含 `.html`） |
+| `QZONE_TIMELINE_FILE` | 同标题 | 时间轴文件名（不含 `.html`），想和标题不一样时才设 |
 | `QZONE_HOST` | `127.0.0.1` | CDP 服务地址 |
 | `QZONE_PORT` | `9222` | 远程调试端口，被占用时改掉 |
 | `QZONE_DELAY` | `700` | 请求间隔（毫秒）。**触发风控时调到 1500+** |
@@ -192,7 +232,7 @@ QZONE_TITLE="我的QQ空间" python scripts/gen_markdown.py   # 输出 我的QQ�
 1. `node scripts/close.js` —— 否则 Chromium 进程常驻后台
 2. 删掉 `data/auth.json` 里的 `cookieStr`（如有）——**那是你的有效登录凭据**
 3. 删掉 `.chrome-profile/` —— **里面是完整的 QQ 登录态**
-4. 别把 `QQ空间存档.md`、`data/`、`images/` 误传到公开仓库 —— 里面有你的 QQ 号、好友昵称、定位
+4. 别把 `QQ空间存档.md`、`QQ空间时间轴.html`、`data/`、`images/` 误传到公开仓库 —— 里面有你的 QQ 号、好友昵称、定位。根目录下的这几个名字已经写进 `.gitignore`；用 `QZONE_OUT` 或自定义文件名导到别处时，要自己留意
 
 > Windows 上 `.chrome-profile/` 常有上千个文件，可能触发删除保护提示。按提示逐个确认，或者用 `mv` 移到别处。
 
@@ -230,17 +270,22 @@ qzone-export/
 │   ├── download_images.py       # ⑤ 图片下载
 │   ├── retry_failed.py          # ⑥ 失效图重试
 │   ├── gen_markdown.py          # ⑦ Markdown 生成
-│   ├── close.js                 # ⑧ 关闭浏览器
+│   ├── gen_timeline.py          # ⑧ 时间轴页面生成（只含说说）
+│   ├── timeline_template.html   #    时间轴页面模板（样式和交互都在里面）
+│   ├── close.js                 # ⑨ 关闭浏览器
 │   └── make_example.py          # 生成 examples/（虚构数据）
 ├── references/
 │   ├── SOP.md                   # 标准操作程序：每阶段的目标/输入/输出/通过标准/故障处理
 │   └── api-notes.md             # 接口速查：端点、参数、字段、返回码
 ├── examples/
-│   ├── example-output.md        # 工具的真实输出（虚构数据）
+│   ├── example-output.md        # Markdown 的真实输出（虚构数据）
+│   ├── example-timeline.html    # 时间轴页面的真实输出（虚构数据，可直接打开）
 │   ├── data/                    # 对应的输入 fixtures
-│   └── images/
+│   ├── images/
+│   └── screenshots/             # README 里的截图
 └── tests/
     ├── test_core.py             # 纯 Python 逻辑自测，28 项，零依赖
+    ├── test_timeline.py         # 时间轴生成自测，44 项，零依赖（有 Node 时顺带检查页面脚本语法）
     └── test_lib.js              # 纯 Node 逻辑自测，15 项，零依赖（不需要 puppeteer-core）
 ```
 

@@ -89,3 +89,33 @@
 
 [1.0.1]: https://github.com/RanchoGao/qzone-shuoshuo-timeline/releases/tag/v1.0.1
 
+## [1.1.0] — 2026-10-04
+
+新增**时间轴页面**：把说说做成一张离线网页，用来按时间整体回看自己的过往。仓库同时改名为 `qzone-shuoshuo-timeline`（skill 名仍是 `qzone-export`，克隆到 skills 目录时文件夹名不变）。
+
+### 新增
+
+- `scripts/gen_timeline.py` 和 `scripts/timeline_template.html`：生成单文件 `QQ空间时间轴.html`，只含说说
+  - **年月热力图**：哪些年、哪些月发得最多一眼可见，点格子跳到那个月
+  - **时间轴**：按年、月分组，最新在前 / 最早在前可切换，右侧年份导航
+  - **搜索与筛选**：全文搜索（含评论、地点，命中高亮）、按年份、只看有图、只看有评论
+  - **回顾**：「跳到最早一条」「随机回顾一条」「那年今日」
+  - **看图**：大图查看，键盘 ← / → / Esc 与触摸滑动；失效图片显示占位，不显示坏链
+  - 深色模式、手机适配；不联网、不依赖任何外部库
+- 环境变量 `QZONE_TIMELINE_TITLE`（页面标题，默认也是文件名）、`QZONE_TIMELINE_FILE`（文件名与标题不同时用）
+- `tests/test_timeline.py`：44 项零依赖自测，覆盖数据整形、内嵌安全（正文里的 `</script>` 不会提前结束数据块）、端到端生成；有 Node 时顺带做页面脚本的语法检查
+- `examples/example-timeline.html` 和 `examples/screenshots/`（README 里的截图）
+
+### 变更
+
+- `examples/` 的虚构数据从 3 条扩到 38 条说说，覆盖多图、定位、转发、视频、音乐、链接和嵌套评论；占位图换成彩色渐变，示例才有看头。示例时间用本地时间字符串构造，换时区也读出同样的日期
+- `make_example.py` 现在同时生成 Markdown 和时间轴页面，并在生成前清掉旧的示例图，保证结果可复现
+- `.gitignore` 增加根目录的 `QQ空间时间轴.html`（真实导出的页面含 QQ 号和好友昵称）
+- README、SKILL.md、SOP.md 补上时间轴的用法、参数、通过标准和排障
+
+### 验证
+
+- 三套自测全过：`test_lib.js` 15 项、`test_core.py` 28 项、`test_timeline.py` 44 项
+- 在 headless Chrome 里对示例页逐项操作：搜索、三种筛选、排序切换、评论展开、热力图跳转、灯箱、主题切换，加手机宽度下无横向溢出，全程无 JS 报错
+- 用 1573 条、跨 17 年、三千多张图引用的合成数据压测：页面加载约 0.16 秒，筛选 / 切换排序约 0.2 秒。混入 `<img onerror>` 和 `<script>` 的正文被当成纯文本显示，不会执行
+

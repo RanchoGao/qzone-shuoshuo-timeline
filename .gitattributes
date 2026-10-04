@@ -3,6 +3,7 @@
 
 # 明确文本类型
 *.md   text
+*.html text
 *.py   text
 *.js   text
 *.json text

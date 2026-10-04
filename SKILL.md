@@ -1,16 +1,16 @@
 ---
 name: qzone-export
-description: 导出 QQ 空间（Qzone）说说与日志为本地 Markdown 存档，含图片、评论、转发、定位。全流程标准操作程序 SOP 见 references/SOP.md。Use when the user wants to back up or export their Qzone content — 导出 QQ 空间 / 备份说说 / 备份日志 / QQ 空间存档 / 把说说保存下来 / 导出 QQ 相册说说 / qzone export / export QQzone.
+description: 导出 QQ 空间（Qzone）说说与日志为本地 Markdown 存档，并把说说做成可离线打开的时间轴网页（年月热力图、搜索筛选、看图），含图片、评论、转发、定位。全流程标准操作程序 SOP 见 references/SOP.md。Use when the user wants to back up or export their Qzone content, or browse their old posts on a timeline — 导出 QQ 空间 / 备份说说 / 备份日志 / QQ 空间存档 / 把说说保存下来 / 说说时间轴 / 回看过往说说 / 导出 QQ 相册说说 / qzone export / qzone timeline / export QQzone.
 license: MIT
-compatibility: Requires Python 3.8+ (stdlib only), Node 18+, and puppeteer-core, plus Chrome or Edge. User must log in to Qzone by scanning a QR code.
+compatibility: Requires Python 3.8+ (stdlib only), Node 18+, and puppeteer-core, plus Chrome or Edge. User must log in to Qzone by scanning a QR code. The timeline page needs only a browser to open.
 metadata:
   author: EurekaGao
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # qzone-export：导出 QQ 空间说说与日志
 
-把 QQ 空间的**说说**和**日志**连同**图片、评论、转发、定位**，导出成一份本地 Markdown，图片存到 `images/` 用相对路径引用。
+把 QQ 空间的**说说**和**日志**连同**图片、评论、转发、定位**，导出成一份本地 Markdown，图片存到 `images/` 用相对路径引用。再把**说说**生成一张**离线时间轴网页**，用来按时间整体回看自己的过往。
 
 QQ 空间没有官方导出功能。可行路线是：**在真实浏览器里登录，然后在页面上下文调用同源 CGI 接口**——Cookie 由浏览器自动携带，不用手工拼 Cookie 头，也绕开了 httpOnly 和 GBK 编码的坑。
 
@@ -34,7 +34,8 @@ QQ 空间没有官方导出功能。可行路线是：**在真实浏览器里登
 - 导出 / 备份 QQ 空间内容（说说、日志）
 - 把说说保存下来、防止 QQ 空间关停丢失
 - 想把多年说说做成可检索的本地文档
-- qzone export / export QQzone posts
+- 想按时间轴回看自己的说说、看哪些年发得多（阶段 D2）
+- qzone export / qzone timeline / export QQzone posts
 
 **动手前先问清两件事**（直接决定实现路径）：
 
@@ -43,7 +44,7 @@ QQ 空间没有官方导出功能。可行路线是：**在真实浏览器里登
 | 图片怎么处理？ | 下载到本地（推荐，离线可看）／ 只留原始链接（快，但会失效）／ 两者都要 |
 | 文件怎么组织？ | 日志说说分开两个文件 ／ 合并成一个大文件（推荐）／ 每篇日志单独一个文件 |
 
-如果用户已经明确说了，不再追问。
+如果用户已经明确说了，不再追问。用户提到「时间轴」「回看」「看看这些年」时，默认要做阶段 D2；没提就在交付时问一句要不要。
 
 ---
 
@@ -53,6 +54,9 @@ QQ 空间没有官方导出功能。可行路线是：**在真实浏览器里登
 |---|---|---|
 | 输出根目录 | 当前工作目录下的 `qzone-export/` | 产物都在这里 |
 | `QZONE_OUT` | 未设置时取脚本上一级的父目录 | 覆盖上面那个根目录，用来导出到别的位置。**它是根目录本身**：`data/`、`images/`、`.md` 都生成在它下面，Node 与 Python 两侧语义一致 |
+| `QZONE_TITLE` | `QQ空间存档` | Markdown 文件名（不含 `.md`） |
+| `QZONE_TIMELINE_TITLE` | `QQ空间时间轴` | 时间轴页面标题，默认也是文件名（不含 `.html`） |
+| `QZONE_TIMELINE_FILE` | 同标题 | 时间轴文件名（不含 `.html`），想和标题不一样时才设 |
 | `QZONE_HOST` | `127.0.0.1` | CDP 服务地址 |
 | `QZONE_PORT` | `9222` | 远程调试端口。被占用时先释放，或换成 9333 |
 | `NODE_PATH` | 无 | **必须**指向含 `puppeteer-core` 的 `node_modules`，否则 `require` 失败 |
@@ -74,8 +78,9 @@ NODE_PATH="/path/to/node_modules" node scripts/fetch_shuoshuo.js
 **阶段 0（可选但推荐）：跑自测。** 两侧都不需要网络、浏览器或 `puppeteer-core`，几秒出结果：
 
 ```bash
-node tests/test_lib.js      # 15 项：g_tk 算法、JSONP 解包、环境变量语义
-python tests/test_core.py   # 28 项：Markdown 转义、HTML 转换、图片计数
+node tests/test_lib.js        # 15 项：g_tk 算法、JSONP 解包、环境变量语义
+python tests/test_core.py     # 28 项：Markdown 转义、HTML 转换、图片计数
+python tests/test_timeline.py # 44 项：时间轴数据整形、内嵌安全、端到端生成
 ```
 
 不通过就先修脚本，别带着病跑真实数据。
@@ -132,13 +137,25 @@ python scripts/gen_markdown.py
 
 **通过标准**：引用图片数 == `images/` 文件数且缺失为 0；随机抽 3 条渲染正常（换行在、图片在、评论在）；不存在 `\数字` 形式的残留。
 
+### D2　时间轴页面 → `QQ空间时间轴.html`（可选，只含说说）
+
+```
+python scripts/gen_timeline.py
+```
+
+读 `data/shuoshuo.json`、`images.json`，沿用阶段 D 同一套文本清洗（表情、@提及），生成**单个离线 HTML**：年月热力图、按年月分组的时间轴、搜索与筛选（有图 / 有评论 / 年份）、「那年今日」、大图查看、深色模式。数据内嵌在文件里，图片按相对路径引用 `images/`，不联网、不依赖外部库。
+
+**通过标准**：脚本打印的说说条数 == `shuoshuo.json` 条数；用浏览器打开后，热力图格子数字之和 == 总条数；图片能显示（缺失会显示「图片无法加载」，说明 `.html` 没和 `images/` 放在一起）。
+**注意**：时间轴不含日志。页面里的评论默认折叠，点「评论 N」展开。
+
 ### E　收尾
 
 1. `node scripts/close.js`——**必须执行**，否则 Chromium 常驻后台
 2. 删掉 `data/auth.json` 里的 `cookieStr`
 3. 删掉 `.chrome-profile/`
    > 该目录通常有上千个文件，可能触发批量删除保护。**不要绕过安全策略**：改用 `mv` 移到项目外，或明确告诉用户手动删
-4. 交付说明要讲清：导出了什么（条数 / 时间跨度 / 图片数）、哪些没办到、**移动时 `.md` 和 `images/` 必须一起移动**
+4. 交付说明要讲清：导出了什么（条数 / 时间跨度 / 图片数）、哪些没办到、**移动时 `.md`、`.html` 和 `images/` 必须一起移动**
+5. 提醒用户：`QQ空间时间轴.html` 和 `QQ空间存档.md` 里有 QQ 号、好友昵称、定位，**不要上传到公开仓库或随手发给别人**（根目录下这几个名字已在 `.gitignore` 里）
 
 ---
 
@@ -146,7 +163,7 @@ python scripts/gen_markdown.py
 
 ```bash
 # 0. 自测（可选但推荐）
-node tests/test_lib.js && python tests/test_core.py
+node tests/test_lib.js && python tests/test_core.py && python tests/test_timeline.py
 
 # 1. 启动浏览器（给用户扫码）
 "/path/to/chrome" --remote-debugging-port=9222 \
@@ -167,6 +184,9 @@ python scripts/retry_failed.py
 # 5. 生成 Markdown
 python scripts/gen_markdown.py
 
+# 5b. 生成时间轴页面（只含说说）
+python scripts/gen_timeline.py
+
 # 6. 收尾
 NODE_PATH=/path/to/node_modules node scripts/close.js
 ```
@@ -177,6 +197,8 @@ NODE_PATH=/path/to/node_modules node scripts/close.js
 |---|---|
 | 「帮我把 QQ 空间的说说导出来」 | 先问图片和文件组织方式，再跑完整流程 |
 | 「我 QQ 空间的日志怎么备份」 | 同上，日志通常只有几篇到几十篇，很快 |
+| 「做个时间轴，我想回看这些年的说说」 | 跑完整流程，最后加跑阶段 D2，告诉用户双击 `QQ空间时间轴.html` 打开 |
+| 「我已经导出过了，只想要时间轴」 | `data/` 还在就只跑 `python scripts/gen_timeline.py`；不在就得从阶段 A 重来 |
 | 「导出到 D:/备份」 | 指定输出根目录为 `D:/备份` |
 | 「图片太多跑不动了」 | 问是否改成只留链接；或先抓一批看看量级 |
 | 「有好多图下载失败」 | 跑完 `retry_failed.py` 后，如实告知哪些图床已永久下线 |
@@ -196,3 +218,6 @@ NODE_PATH=/path/to/node_modules node scripts/close.js
 | 猜不出接口路径 | 跑 `node scripts/sniff.js blog` 嗅一遍再说 |
 | Node 抓到了数据，Python 说找不到文件 | `QZONE_OUT` 指的是**输出根目录**（`data/` 和 `images/` 的父目录），不是 `data/` 本身。Node 和 Python 两侧语义一致，别混用 |
 | 正文没图但 header 说有图 | 日志走 `<img orgsrc>` 提取；统计口径按该条自己引用的 URL 去重计数，不是全量 `images.json` |
+| 时间轴页面里图片全是「图片无法加载」 | `.html` 没和 `images/` 放在同一目录（图片按相对路径引用）；或还没跑 `download_images.py` |
+| 时间轴页面报「no shuoshuo found」 | `data/shuoshuo.json` 不存在或为空，先跑 `fetch_shuoshuo.js`；设了 `QZONE_OUT` 的话确认指向的是输出根目录 |
+| 想让时间轴带上日志 | 目前不支持，时间轴只做说说；日志在 Markdown 存档里 |
