@@ -50,7 +50,7 @@
 - Node 侧依赖 `puppeteer-core`，需自行 `npm install` 并正确设置 `NODE_PATH`；Python 侧零依赖
 - 只支持导出本人登录后可见的内容
 
-[1.0.0]: https://github.com/RanchoGao/qzone-export/releases/tag/v1.0.0
+[1.0.0]: https://github.com/RanchoGao/qzone-shuoshuo-timeline/releases/tag/v1.0.0
 
 ## [1.0.1] — 2026-10-04
 
@@ -87,5 +87,5 @@
 
 说说 1573 条的 tid 集合完全一致，正文/图片数/时间戳零差异；差异只有三项：标题空格、导出时间戳、一位好友改了昵称。
 
-[1.0.1]: https://github.com/RanchoGao/qzone-export/releases/tag/v1.0.1
+[1.0.1]: https://github.com/RanchoGao/qzone-shuoshuo-timeline/releases/tag/v1.0.1
 

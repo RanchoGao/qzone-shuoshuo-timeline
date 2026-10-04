@@ -77,9 +77,9 @@ Cookie 由浏览器自动携带，不用手工拼 Cookie 头，也绕开了 http
 
 ```bash
 # 例：装到通用目录
-git clone https://github.com/RanchoGao/qzone-export.git ~/.agents/skills/qzone-export
+git clone https://github.com/RanchoGao/qzone-shuoshuo-timeline.git ~/.agents/skills/qzone-export
 # 例：装到 Claude Code
-git clone https://github.com/RanchoGao/qzone-export.git ~/.claude/skills/qzone-export
+git clone https://github.com/RanchoGao/qzone-shuoshuo-timeline.git ~/.claude/skills/qzone-export
 ```
 
 > 各工具读取的目录还在变化。装好后如果识别不到，查一下该工具的最新文档。
