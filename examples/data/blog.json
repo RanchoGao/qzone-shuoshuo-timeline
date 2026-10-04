@@ -1,0 +1,16 @@
+[
+ {
+  "blogId": "1300000001",
+  "title": "示例日志：一次小项目的复盘",
+  "pubTime": "2015-03-15 12:12",
+  "cate": "个人日记",
+  "commentNum": 1,
+  "contentHtml": "<div id=\"blogDetailDiv\"><p>这个项目做完快一个月了，趁还记得住写几句。</p><div><br/></div><div><span style=\"font-weight:bold\">踩过的坑有：</span></div><ul><li>一开始没定清楚目标，返工了两次</li><li>沟通成本比想象中高很多</li></ul><p>下次会先花时间对齐目标。</p><div><img class=\"QZBLOG_IMG_LOADING\" src=\"http://qzonestyle.gtimg.cn/aoi/img/icenter/loading.gif\" orgsrc=\"https://example.com/not-a-real-image/demo-b1.jpg\"/></div><p>就这些。</p></div>",
+  "comments": [
+   {
+    "name": "示例好友",
+    "content": "写得很实在 @{uin:100000001,nick:示例用户,who:1}"
+   }
+  ]
+ }
+]

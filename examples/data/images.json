@@ -1,0 +1,21 @@
+{
+ "aa0000000000000000000001": {
+  "0": {
+   "file": "ss_demo_0001_0.png",
+   "url": "https://example.com/not-a-real-image/demo-p1.jpg",
+   "ok": true
+  },
+  "1": {
+   "file": null,
+   "ok": false,
+   "url": "http://p.qpimg.cn/cgi-bin/cgi_imgproxy?size=0&url=http://example.invalid/old.jpg"
+  }
+ },
+ "1300000001": {
+  "0": {
+   "file": "blog_demo_0001_0.png",
+   "url": "https://example.com/not-a-real-image/demo-b1.jpg",
+   "ok": true
+  }
+ }
+}

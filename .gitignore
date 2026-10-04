@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Node
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---------------------------------------------------------------------------
+# 真实导出产物 — 含个人数据（QQ 号、好友昵称、定位），默认不进版本库。
+# 注意：下面的模式都以 / 开头，只匹配仓库根目录下的数据，
+#       只锚定仓库根目录下的那一层数据，
+#       examples/ 下的虚构示例仍然会正常提交。
+# 要把自己的导出结果提交上去，用 git add -f。
+# ---------------------------------------------------------------------------
+/data/
+/images/
+/QQ空间存档.md
+.chrome-profile/

@@ -1,0 +1,69 @@
+[
+ {
+  "tid": "aa0000000000000000000001",
+  "created_time": 1766759121,
+  "content": "年底回头看了看今年，做了个小总结。\n有些地方确实挺意外的。",
+  "pictotal": 2,
+  "cmtnum": 1,
+  "fwdnum": 0,
+  "source_name": "Android",
+  "lbs": {
+   "id": "",
+   "idname": "",
+   "name": "",
+   "pos_x": "",
+   "pos_y": ""
+  },
+  "pic": [
+   {
+    "url2": "https://example.com/not-a-real-image/demo-p1.jpg"
+   },
+   {
+    "url2": "https://example.com/not-a-real-image/demo-p2.jpg"
+   }
+  ],
+  "commentlist": [
+   {
+    "name": "示例好友",
+    "createTime2": "2025-12-26 22:41:02",
+    "content": "这个总结做得不错 @{uin:100000001,nick:示例用户,who:1}",
+    "list_3": [
+     {
+      "name": "示例用户",
+      "createTime2": "2025-12-26 22:55:11",
+      "content": "谢谢😄 [em]e113[/em]"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "tid": "aa0000000000000000000002",
+  "created_time": 1660635000,
+  "content": "随手记一句，配个表情 [em]e100[/em] [em]e179[/em]",
+  "pictotal": 0,
+  "cmtnum": 0,
+  "fwdnum": 0,
+  "lbs": {
+   "id": "",
+   "idname": "示例城市",
+   "name": "示例城市",
+   "pos_x": "116.39",
+   "pos_y": "39.90"
+  },
+  "pic": []
+ },
+ {
+  "tid": "aa0000000000000000000003",
+  "created_time": 1419753600,
+  "content": "说得好",
+  "rt_uinname": "示例公众号",
+  "rt_con": {
+   "content": "偶然看到一段采访，挺有意思。\n记者：你怎么看这件事？\n受访者：我觉得慢慢来比较好。"
+  },
+  "pictotal": 0,
+  "cmtnum": 0,
+  "fwdnum": 0,
+  "pic": []
+ }
+]
